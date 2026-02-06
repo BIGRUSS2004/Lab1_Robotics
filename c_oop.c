@@ -1,94 +1,96 @@
 #include <stdio.h>
+#include <stdlib.h>
 
+/* Base class */
 typedef struct {
     float weight;
     float tail_length;
-    void (*make_sound)();
 } Felidae;
 
-typedef struct {
-    Felidae felidae;
-} Panthera;
-
-typedef struct {
-    Panthera panthera;
-} Tigris;
-
-typedef struct {
-    Felidae felidae;
-} Felis;
-
-typedef struct {
-    Felis felis;
-} Catus;
-
-void make_roar() { printf("Roar\n"); }
-void make_meow() { printf("Meow\n"); }
-
-void init_felidae(Felidae *felidae, float weight, float tail_length, void (*make_sound)()) {
-    felidae->weight = weight;
-    felidae->tail_length = tail_length;
-    felidae->make_sound = make_sound;
-
+void init_felidae(Felidae *f, float weight, float tail_length) {
     printf("Felidae constructor\n");
-    printf("Weight: %.1f kg\n", felidae->weight);
-    printf("Tail length: %.1f m\n", felidae->tail_length);
+    f->weight = weight;
+    f->tail_length = tail_length;
+    printf("Weight: %.1f kg\n", f->weight);
+    printf("Tail length: %.1f m\n", f->tail_length);
 }
 
-void init_panthera(Panthera *panthera, float weight, float tail_length) {
-    init_felidae(&panthera->felidae, weight, tail_length, make_roar);
-    printf("Panthera constructor\n");
-}
-
-void init_tigris(Tigris *tigris) {
-    init_panthera(&tigris->panthera, 200.0f, 1.0f);
-    printf("Tigris constructor\n");
-}
-
-void init_felis(Felis *felis, float weight, float tail_length) {
-    init_felidae(&felis->felidae, weight, tail_length, make_meow);
-    printf("Felis constructor\n");
-}
-
-void init_catus(Catus *catus) {
-    init_felis(&catus->felis, 4.0f, 0.3f);
-    printf("Catus constructor\n");
-}
-
-void deinit_felidae(Felidae *felidae) {
-    felidae->make_sound = NULL;
+void destroy_felidae() {
     printf("Felidae destructor\n");
 }
 
-void deinit_panthera(Panthera *panthera) {
+/* Panthera */
+typedef struct {
+    Felidae base;
+} Panthera;
+
+void init_panthera(Panthera *p, float weight, float tail_length) {
+    init_felidae(&p->base, weight, tail_length);
+    printf("Panthera constructor\n");
+}
+
+void destroy_panthera() {
     printf("Panthera destructor\n");
-    deinit_felidae(&panthera->felidae);
 }
 
-void deinit_tigris(Tigris *tigris) {
+/* Tigris */
+typedef struct {
+    Panthera base;
+} Tigris;
+
+void init_tigris(Tigris *t) {
+    init_panthera(&t->base, 221.2f, 1.0f);
+    printf("Tigris constructor\n");
+}
+
+void destroy_tigris() {
     printf("Tigris destructor\n");
-    deinit_panthera(&tigris->panthera);
 }
 
-void deinit_felis(Felis *felis) {
+/* Felis */
+typedef struct {
+    Felidae base;
+} Felis;
+
+void init_felis(Felis *f, float weight, float tail_length) {
+    init_felidae(&f->base, weight, tail_length);
+    printf("Felis constructor\n");
+}
+
+void destroy_felis() {
     printf("Felis destructor\n");
-    deinit_felidae(&felis->felidae);
 }
 
-void deinit_catus(Catus *catus) {
+/* Catus */
+typedef struct {
+    Felis base;
+} Catus;
+
+void init_catus(Catus *c) {
+    init_felis(&c->base, 4.5f, 0.3f);
+    printf("Catus constructor\n");
+}
+
+void destroy_catus() {
     printf("Catus destructor\n");
-    deinit_felis(&catus->felis);
 }
 
 int main() {
-    Tigris tigris;
-    init_tigris(&tigris);
-    tigris.panthera.felidae.make_sound();
+    Tigris tiger;
+    init_tigris(&tiger);
+    printf("Roar\n");
 
-    Catus catus;
-    init_catus(&catus);
-    catus.felis.felidae.make_sound();
+    Catus cat;
+    init_catus(&cat);
+    printf("Meow\n");
 
-    deinit_catus(&catus);
-    deinit_tigris(&tigris);
+    destroy_catus();
+    destroy_felis();
+    destroy_felidae();
+
+    destroy_tigris();
+    destroy_panthera();
+    destroy_felidae();
+
+    return 0;
 }
